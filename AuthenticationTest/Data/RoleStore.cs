@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
+using MyCouch;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,56 +10,72 @@ namespace AuthenticationTest.Data
     {
         public RoleStore() : base("roles")
         {
+            InsertDesignDocument("AuthenticationTest.Data.DesignDocuments.Roles.json");
         }
 
-        public Task<IdentityResult> CreateAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await Store.StoreAsync(role);
+            if (result != null)
+            {
+                return new Result(true);
+            }
+            return new Result(false);
         }
 
-        public Task<IdentityResult> DeleteAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await Store.DeleteAsync(role);
+            return new Result(result);
         }
 
-        public Task<IdentityRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        public async Task<IdentityRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return await Store.GetByIdAsync<IdentityRole>(roleId);
         }
 
-        public Task<IdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        public async Task<IdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var query = new Query("roles", "find_by_name");
+            var result = await Store.QueryAsync<IdentityRole>(query);
+            if (result == null)
+            {
+                return null;
+            }
+            return result.First().Value;
         }
 
         public Task<string> GetNormalizedRoleNameAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(role.NormalizedName);
         }
 
         public Task<string> GetRoleIdAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(role.Id);
         }
 
         public Task<string> GetRoleNameAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(role.Name);
         }
 
-        public Task SetNormalizedRoleNameAsync(IdentityRole role, string normalizedName, CancellationToken cancellationToken)
+        public async Task SetNormalizedRoleNameAsync(IdentityRole role, string normalizedName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            role.NormalizedName = normalizedName;
+            await Store.StoreAsync(role);
         }
 
-        public Task SetRoleNameAsync(IdentityRole role, string roleName, CancellationToken cancellationToken)
+        public async Task SetRoleNameAsync(IdentityRole role, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            role.Name = roleName;
+            await Store.StoreAsync(role);
         }
 
-        public Task<IdentityResult> UpdateAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(IdentityRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await Store.StoreAsync(role);
+            return new Result(true);
         }
     }
 }

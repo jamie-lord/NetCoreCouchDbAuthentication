@@ -12,11 +12,11 @@ namespace AuthenticationTest.Pages.Account.Manage
 {
     public class ResetAuthenticatorModel : PageModel
     {
-        UserManager<ApplicationUser> _userManager;
+        UserManager<User> _userManager;
         ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<User> userManager,
             ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;

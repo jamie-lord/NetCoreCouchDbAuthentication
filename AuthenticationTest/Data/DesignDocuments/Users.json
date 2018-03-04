@@ -1,0 +1,12 @@
+﻿{
+  "_id": "_design/users",
+  "views": {
+    "find_by_user_name": {
+      "map": "function (doc) {\n  if (doc.$doctype == 'user') {\n    emit(doc.normalizedUserName, doc);\n  }\n}"
+    },
+    "find_by_email": {
+      "map": "function (doc) {\n  if (doc.$doctype == 'user') {\n    emit(doc.normalizedEmail, doc);\n  }\n}"
+    }
+  },
+  "language": "javascript"
+}

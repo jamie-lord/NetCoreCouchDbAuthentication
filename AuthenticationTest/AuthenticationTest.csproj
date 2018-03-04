@@ -4,6 +4,10 @@
     <UserSecretsId>aspnet-AuthenticationTest-23D9FB06-C287-4232-9D5F-9CA5E106A841</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Data\DesignDocuments\Roles.json" />
+    <Content Remove="Data\DesignDocuments\Users.json" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" PrivateAssets="All" />
     <PackageReference Include="MyCouch" Version="5.0.3" />
@@ -12,5 +16,9 @@
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\DesignDocuments\Roles.json" />
+    <EmbeddedResource Include="Data\DesignDocuments\Users.json" />
   </ItemGroup>
 </Project>
