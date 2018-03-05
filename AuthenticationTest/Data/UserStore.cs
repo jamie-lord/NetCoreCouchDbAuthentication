@@ -1,16 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using MyCouch;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AuthenticationTest.Data
 {
-    public class UserStore : CouchDbStoreBase, IUserStore<User>, IUserPasswordStore<User>, IUserEmailStore<User>
+    public class UserStore : CouchDbStoreBase, IUserStore<User>, IUserRoleStore<User>, IUserPasswordStore<User>, IUserEmailStore<User>
     {
         public UserStore() : base("users")
         {
             InsertDesignDocument("AuthenticationTest.Data.DesignDocuments.Users.json");
+        }
+
+        public async Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+        {
+            if (!user.Roles.Contains(roleName))
+            {
+                user.Roles.Add(roleName);
+                await UpdateAsync(user, cancellationToken);
+            }
         }
 
         public async Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken)
@@ -31,9 +41,12 @@ namespace AuthenticationTest.Data
 
         public async Task<User> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            var query = new Query("users", "find_by_email");
+            var query = new Query("users", "find_by_email")
+            {
+                Key = normalizedEmail
+            };
             var result = await Store.QueryAsync<User>(query);
-            if (result == null || result.Count() == 0)
+            if (result == null || !result.Any())
             {
                 return null;
             }
@@ -47,9 +60,12 @@ namespace AuthenticationTest.Data
 
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            var query = new Query("users", "find_by_user_name");
+            var query = new Query("users", "find_by_user_name")
+            {
+                Key = normalizedUserName
+            };
             var result = await Store.QueryAsync<User>(query);
-            if (result == null || result.Count() == 0)
+            if (result == null || !result.Any())
             {
                 return null;
             }
@@ -81,6 +97,11 @@ namespace AuthenticationTest.Data
             return Task.FromResult(user.PasswordHash);
         }
 
+        public Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.Roles);
+        }
+
         public Task<string> GetUserIdAsync(User user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.Id);
@@ -91,9 +112,44 @@ namespace AuthenticationTest.Data
             return Task.FromResult(user.UserName);
         }
 
+        public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        {
+            var query = new Query("users", "find_with_role")
+            {
+                Key = roleName
+            };
+            var result = await Store.QueryAsync<User>(query);
+            if (result == null || !result.Any())
+            {
+                return null;
+            }
+            var results = new List<User>();
+            foreach (var item in result)
+            {
+                if (item.Value != null && !results.Contains(item.Value))
+                {
+                    results.Add(item.Value);
+                }
+            }
+            return results;
+        }
+
         public Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
         {
             return Task.FromResult(!string.IsNullOrEmpty(user.PasswordHash));
+        }
+
+        public Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.Roles.Contains(roleName));
+        }
+
+        public async Task RemoveFromRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+        {
+            if (user.Roles.Remove(roleName))
+            {
+                await UpdateAsync(user, cancellationToken);
+            }
         }
 
         public async Task SetEmailAsync(User user, string email, CancellationToken cancellationToken)

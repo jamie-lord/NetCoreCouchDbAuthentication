@@ -6,6 +6,9 @@
     },
     "find_by_email": {
       "map": "function (doc) {\n  if (doc.$doctype == 'user') {\n    emit(doc.normalizedEmail, doc);\n  }\n}"
+    },
+    "find_with_role": {
+      "map": "function (doc) {\n  if (doc.$doctype == 'user') {\n    for( var i=0, l=doc.roles.length; i<l; i++) {\n      emit( doc.roles[i], doc );\n    }\n  }\n}"
     }
   },
   "language": "javascript"
